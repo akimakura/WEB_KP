@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Запись на тренировку</title>
+</head>
+<body>
+    <h1>Запись на тренировку</h1>
+    <form action="../../app/database/book.php" method="POST">
+        <label for="instructor">Выберите тренера:</label>
+        <select name="instructor" id="instructor" onchange="fetchTimeSlots(this.value)">
+            <?php
+            include '../../app/database/connect.php';
+
+            // Получение списка тренеров
+            $stmt = $pdo->query("SELECT instructor_id, education FROM instructor");
+            $instructor = $stmt->fetchAll();
+
+            if (count($instructor) > 0) {
+                foreach ($instructor as $instructor) {
+                    echo "<option value='{$instructor['instructor_id']}'>{$instructor['education']}</option>";
+                }
+            } else {
+                echo "<option value=''>Нет доступных тренеров</option>";
+            }
+            ?>
+        </select>
+        <br>
+        <label for="time_window">Выберите доступное время:</label>
+        <select name="time_window" id="time_window">
+            <!-- Options будут обновлены с помощью JavaScript -->
+        </select>
+        <br>
+        <label for="users">Ваше имя:</label>
+        <select name="users" id="users">
+            <?php
+            // Получение списка пользователей
+            $stmt = $pdo->query("SELECT users_id, name FROM users");
+            $users = $stmt->fetchAll();
+
+            if (count($users) > 0) {
+                foreach ($users as $users) {
+                    echo "<option value='{$users['users_id']}'>{$users['name']}</option>";
+                }
+            } else {
+                echo "<option value=''>Нет доступных пользователей</option>";
+            }
+            ?>
+        </select>
+        <br>
+        <input type="submit" value="Записаться">
+    </form>
+
+    <script>
+        function fetchTimeSlots(instructorId) {
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET',`../../app/database/get_time_slots.php?instructor_id=${instructorId}`, true);
+            xhr.onload = function () {
+                if (this.status === 200) {
+                    document.getElementById('time_window').innerHTML = this.responseText;
+                } else {
+                    console.error("Не удалось получить временные интервалы");
+                }
+            };
+            xhr.send();
+        }
+    </script>
+</body>
+</html>

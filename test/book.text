@@ -1,0 +1,29 @@
+<?php
+include 'connect.php';
+
+$instructor_id = isset($_POST['instructor']) ? (int)$_POST['instructor'] : 0;
+$time_window_id = isset($_POST['time_window']) ? (int)$_POST['time_window'] : 0;
+$user_id = isset($_POST['user']) ? (int)$_POST['user'] : 0;
+
+if ($instructor_id > 0 && $time_window_id > 0 && $user_id > 0) {
+    $stmt = $pdo->prepare("SELECT start_time, end_time FROM time_window WHERE time_window_id = ?");
+    $stmt->execute([$time_window_id]);
+    $time_window = $stmt->fetch();
+
+    if ($time_window) {
+        $start_time = $time_window['start_time'];
+        $end_time = $time_window['end_time'];
+
+        $stmt = $pdo->prepare("INSERT INTO bookings (instructor_id, user_id, start_time, end_time) VALUES (?, ?, ?, ?)");
+        if ($stmt->execute([$instructor_id, $user_id, $start_time, $end_time])) {
+            echo "Вы успешно записались на тренировку!";
+        } else {
+            echo "Ошибка при записи на тренировку.";
+        }
+    } else {
+        echo "Выбранный временной интервал не найден.";
+    }
+} else {
+    echo "Некорректные данные формы.";
+}
+?>

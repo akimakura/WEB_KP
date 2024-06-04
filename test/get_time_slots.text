@@ -1,0 +1,23 @@
+<?php
+include 'connect.php';
+
+$instructor_id = isset($_GET['instructor_id']) ? (int)$_GET['instructor_id'] : 0;
+
+if ($instructor_id > 0) {
+    $stmt = $pdo->prepare("SELECT time_window_id, start_time, end_time FROM time_window WHERE instructor_id = ?");
+    $stmt->execute([$instructor_id]);
+    $time_window = $stmt->fetchAll();
+
+    if (count($time_window) > 0) {
+        foreach ($time_window as $slot) {
+            echo "<option value='{$slot['time_window_id']}'>{$slot['start_time']} - {$slot['end_time']}</option>";
+        }
+    } else {
+        echo "<option value=''>Нет доступных временных интервалов</option>";
+    }
+} else {
+    echo "<option value=''>Выберите тренера</option>";
+}
+?>
+
+
